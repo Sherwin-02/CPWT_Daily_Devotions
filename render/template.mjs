@@ -111,7 +111,7 @@ export function buildHtml(d) {
   .verse-en .ref { font: 600 0.62em Montserrat, sans-serif; letter-spacing: 2px; }
   .footer { position: absolute; left: 0; right: 0; bottom: 0; height: 130px; background: ${PALETTE.wine}; border-top: 6px solid ${PALETTE.rust};
             display: flex; align-items: center; justify-content: center; gap: 24px; }
-  .footer img { height: 70px; }
+  .footer img { height: 96px; }
   .footer .name { color: ${PALETTE.cream}; font: 700 34px Montserrat, sans-serif; letter-spacing: 4px; text-transform: uppercase; }
 </style></head>
 <body>
