@@ -1,0 +1,44 @@
+name: Render devotion image
+
+# Started by the dashboard app (lib/workflow.js) through the GitHub API.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: Devotion date (YYYY-MM-DD)
+        required: true
+      payload:
+        description: Base64 JSON with the verse and theme
+        required: true
+
+concurrency:
+  group: render-${{ inputs.date }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_URL: ${{ secrets.APP_URL }}
+      RENDER_SECRET: ${{ secrets.RENDER_SECRET }}
+      PAYLOAD: ${{ inputs.payload }}
+      DATE: ${{ inputs.date }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: render/package-lock.json
+      - name: Install renderer
+        working-directory: render
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Draw and upload image
+        run: node render/render.mjs --payload-b64 "$PAYLOAD" --upload
+      - name: Report failure to the app
+        if: failure()
+        run: |
+          curl -fsS -X POST -H "Authorization: Bearer $RENDER_SECRET" "$APP_URL/api/render-callback?date=$DATE&failed=1" || true
